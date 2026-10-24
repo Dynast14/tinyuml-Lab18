@@ -131,6 +131,7 @@ public class CreationHandlerTest extends MockObjectTestCase {
       .will(returnValue(mockNode.proxy()));
     handler.setElementType(ElementType.PACKAGE);
     handler.mousePressed((EditorMouseEvent) mockEvent.proxy());
+    System.out.print("Prueba Coords");
 
     // create component
     mockFactory.expects(once()).method("createNode")

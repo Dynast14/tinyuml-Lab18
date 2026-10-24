@@ -70,6 +70,7 @@ public class CreationHandler implements EditorMode {
   public void setElementType(ElementType type) {
     elementType = type;
     element = editor.getDiagram().getElementFactory().createNode(elementType);
+    System.out.println("Crear");
     element.setParent(editor.getDiagram());
     cachedBounds = null;
   }

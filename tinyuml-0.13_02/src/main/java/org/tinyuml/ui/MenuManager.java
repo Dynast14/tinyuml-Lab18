@@ -127,6 +127,7 @@ public class MenuManager implements ActionListener {
     snapToGrid.setSelected(true);
     viewMenu.addSeparator();
     createMenuItem(viewMenu, "redraw");
+    createMenuItem(viewMenu, "fitwindow");
   }
 
   /**

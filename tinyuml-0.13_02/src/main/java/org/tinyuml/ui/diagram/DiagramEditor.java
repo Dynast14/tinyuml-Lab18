@@ -41,6 +41,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -251,6 +252,15 @@ DiagramEditorNotification, DiagramOperations, NodeChangeListener {
    */
   public void deleteSelection() {
     Collection<DiagramElement> elements = getSelectedElements();
+    if (elements.size() > 1) {
+      int option = JOptionPane.showConfirmDialog(this,
+        "Se eliminaran " + elements.size() + " elementos seleccionados. "
+        + "Â¿Desea continuar?", "Confirmar eliminaciÃ³n",
+        JOptionPane.YES_NO_OPTION);
+      if (option != JOptionPane.YES_OPTION) {
+        return;
+      }
+    }
     execute(new DeleteElementCommand(this, elements));
   }
   /**
@@ -271,9 +281,9 @@ DiagramEditorNotification, DiagramOperations, NodeChangeListener {
 		clonedElements.put(elem, copia);
 	}
 	
-	// hasta aquí tengo el hash de cada objeto con su clon (del nuevo diagrama)
+	// hasta aquï¿½ tengo el hash de cada objeto con su clon (del nuevo diagrama)
 	// ahora debo iterar por cada Connection en elements y rehacer sus conexiones
-	// tomaré el ejemplo desde PasteElementCommand.
+	// tomarï¿½ el ejemplo desde PasteElementCommand.
 	for(DiagramElement elem : elements){
 		if(elem instanceof Connection){
 			Connection currentConnection = (Connection)elem;
@@ -594,6 +604,43 @@ DiagramEditorNotification, DiagramOperations, NodeChangeListener {
   public void setScaling(Scaling aScaling) {
     scaling = aScaling;
     repaint();
+  }
+
+  /**
+   * Adjusts the zoom level and scrolls to the origin so that the whole
+   * diagram becomes visible in the current viewport. This only changes the
+   * view (scaling and scroll position), never the stored position or size
+   * of the diagram's elements.
+   */
+  public void fitToWindow() {
+    Dimension totalSize = getTotalCanvasSize();
+    Rectangle visible = getVisibleRect();
+    if (totalSize.width <= 0 || totalSize.height <= 0
+      || visible.width <= 0 || visible.height <= 0) {
+      return;
+    }
+    double idealScale = Math.min(
+      visible.getWidth() / totalSize.getWidth(),
+      visible.getHeight() / totalSize.getHeight());
+    setScaling(bestFitScaling(idealScale));
+    scrollRectToVisible(new Rectangle(0, 0, 1, 1));
+  }
+
+  /**
+   * Returns the largest available Scaling preset whose factor does not
+   * exceed idealScale, so the diagram fits without being clipped.
+   * @param idealScale the exact scale factor that would fit perfectly
+   * @return the best fitting Scaling preset
+   */
+  private Scaling bestFitScaling(double idealScale) {
+    if (idealScale >= Scaling.SCALING_150.getScaleFactor()) {
+      return Scaling.SCALING_150;
+    } else if (idealScale >= Scaling.SCALING_100.getScaleFactor()) {
+      return Scaling.SCALING_100;
+    } else if (idealScale >= Scaling.SCALING_75.getScaleFactor()) {
+      return Scaling.SCALING_75;
+    }
+    return Scaling.SCALING_50;
   }
 
   /**
